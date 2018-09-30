@@ -1,14 +1,25 @@
 <template>
-  <div 
-    :id="id" 
-    ref="dropzoneElement"
-    :class="{ 'vue-dropzone dropzone': includeStyling }"
-  >
-    <div 
-      v-if="useCustomSlot"
-      class="dz-message" 
-    >
-      <slot>Drop files here to upload</slot>
+  <div class="mainComponent">
+    <div class="uploadBtnGroup">
+      <button type="button" @click="UploadFromPc()">Upload</button>
+      <button type="button" @click="UploadFromGoogleDrive()">Google Drive</button>
+      <button type="button" @click="UploadFromDropbox()">Dropbox</button>
+    </div>
+    <div class="vueDropzoneComponent" :id="id" ref="dropzoneElement" :class="{ 'vue-dropzone dropzone': includeStyling }">
+      <div v-if="!isGoogleDrive && !isDropbox" class="dz-message">
+        <i class='fa fa-cloud-upload' style="font-size: 90px;"></i>
+        <h3 class="dropzone-custom-title">Drag and drop to upload content!</h3>
+        <div class="subtitle">...or click to select a file from your computer</div>
+      </div>
+      <div v-if="isGoogleDrive" class="googleDriveClass">
+        <p  class="driveLabel">Upload a file from Google Drive</p>
+        <img src="../assets/GoogleDriveIcon.png" alt="google" class="driveIcon">
+        <file-picker-button class="connectGoogleButton" :config="gConfig" @picked="showDetails">
+          Connect to Google Drive
+        </file-picker-button>
+        <p class="driveDescription">We'll open a new page to help you<br>connect your Google Drive account</p>
+      </div>
+      <div v-if="isDropbox"></div>
     </div>
   </div>
 </template>
@@ -16,10 +27,27 @@
 <script>
 import Dropzone from 'dropzone' //eslint-disable-line
 import awsEndpoint from '../services/urlsigner'
+import gapi from 'gapi';
+import FilePickerButton from 'vue-google-picker'
 
 Dropzone.autoDiscover = false
 
 export default {
+  components: {
+    FilePickerButton
+  },
+  created() {
+    this.gConfig = {
+      // The Browser API key obtained from the Google API Console.
+      developerKey: 'AIzaSyBFaTBSf3gb3iBjlfqkxXPMRtZlJeVdqgw',
+
+      // The Client ID obtained from the Google API Console. Replace with your own Client ID.
+      clientId: '895492284088-kf85sokdv7n9uvg0gi0lesdbe5idpcbr.apps.googleusercontent.com',
+
+      // Scope to use to access user's drive.
+      scope: 'https://www.googleapis.com/auth/drive.file'
+    }
+  },
   props: {
     id: {
       type: String,
@@ -58,6 +86,8 @@ export default {
   },
   data() {
     return {
+      isDropbox: false,
+      isGoogleDrive: false,
       isS3: false,
       isS3OverridesServerPropagation: false,
       wasQueueAutoProcess: true,
@@ -117,12 +147,12 @@ export default {
             }
         }
       }
-
+      
         vm.$emit('vdropzone-file-added', file)
         if (vm.isS3 && vm.wasQueueAutoProcess) {
           vm.getSignedAndUploadToS3(file);
         }
-      
+
     })
 
     this.dropzone.on('addedfiles', function(files) {
@@ -261,10 +291,25 @@ export default {
     if (this.destroyDropzone) this.dropzone.destroy()
   },
   methods: {
+    showDetails (data) {
+      console.log(data);
+    },
+    UploadFromPc() {
+      this.isDropbox = false;
+      this.isGoogleDrive = false;
+    },
+    UploadFromGoogleDrive() {
+      this.isGoogleDrive = true;
+      this.isDropbox = false;
+    },
+    UploadFromDropbox() {
+      this.isGoogleDrive = false;
+      this.isDropbox = true;
+    },
     manuallyAddFile: function(file, fileUrl) {
       file.manuallyAdded = true
       this.dropzone.emit("addedfile", file)
-      let containsImageFileType = false 
+      let containsImageFileType = false
       if (fileUrl.indexOf('.png') > -1 || fileUrl.indexOf('.jpg') > -1 || fileUrl.indexOf('.jpeg') > -1) containsImageFileType = true
       if (this.dropzone.options.createImageThumbnails && containsImageFileType && file.size <= this.dropzone.options.maxThumbnailFilesize * 1024 * 1024) {
         fileUrl && this.dropzone.emit("thumbnail", file, fileUrl);
@@ -401,6 +446,34 @@ export default {
 <style lang="less">
   @import (inline) '../../node_modules/dropzone/dist/dropzone.css';
 
+  .mainComponent {
+
+  }
+  .uploadBtnGroup {
+    
+  }
+  .vueDropzoneComponent {
+  }
+  .connectGoogleButton {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .driveIcon {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 135px;
+    height: auto;
+  }
+  .driveLabel {
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+  }
+  .driveDescription{
+    text-align: center;
+  }
   .vue-dropzone {
     border: 2px solid #E5E5E5;
     font-family: 'Arial', sans-serif;

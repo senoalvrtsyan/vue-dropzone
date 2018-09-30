@@ -53,6 +53,8 @@
     "dist"
   ],
   "dependencies": {
-    "dropzone": "^5.5.1"
+    "dropzone": "^5.5.1",
+    "gapi": "0.0.3",
+    "vue-google-picker": "^1.0.0"
   }
 }
