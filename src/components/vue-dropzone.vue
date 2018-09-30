@@ -27,7 +27,6 @@
 <script>
 import Dropzone from 'dropzone' //eslint-disable-line
 import awsEndpoint from '../services/urlsigner'
-import gapi from 'gapi';
 import FilePickerButton from 'vue-google-picker'
 
 Dropzone.autoDiscover = false
