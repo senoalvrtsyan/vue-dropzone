@@ -38,10 +38,10 @@ export default {
   created() {
     this.gConfig = {
       // The Browser API key obtained from the Google API Console.
-      developerKey: 'AIzaSyBFaTBSf3gb3iBjlfqkxXPMRtZlJeVdqgw',
+      developerKey: '',
 
       // The Client ID obtained from the Google API Console. Replace with your own Client ID.
-      clientId: '895492284088-kf85sokdv7n9uvg0gi0lesdbe5idpcbr.apps.googleusercontent.com',
+      clientId: '',
 
       // Scope to use to access user's drive.
       scope: 'https://www.googleapis.com/auth/drive.file'
